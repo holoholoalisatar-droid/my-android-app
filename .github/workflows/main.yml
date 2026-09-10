@@ -8,30 +8,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download project ZIP
+      - name: تحميل المشروع
         uses: actions/checkout@v4
 
-      - name: Extract project
+      - name: فك ضغط المشروع
         run: |
+          mkdir -p project
           unzip -o beintv-tv-project.zip -d project
-          find project -maxdepth 3 -type f | head -100
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: إعداد Java
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: تثبيت Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Build APK
+      - name: بناء APK
         working-directory: project/android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+        run: gradle assembleDebug
 
-      - name: Upload APK
+      - name: رفع APK
         uses: actions/upload-artifact@v4
         with:
           name: Android-APK
