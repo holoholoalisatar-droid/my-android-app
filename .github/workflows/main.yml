@@ -15,6 +15,8 @@ jobs:
         run: |
           mkdir -p project
           unzip -o beintv-tv-project.zip -d project
+          echo "محتويات المشروع:"
+          find project -maxdepth 3 -type f | sort | head -200
 
       - name: إعداد Java
         uses: actions/setup-java@v5
@@ -25,12 +27,19 @@ jobs:
       - name: تثبيت Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: البحث عن مشروع Android
+        run: |
+          ANDROID_DIR=$(find project -type f -name "settings.gradle" -o -name "settings.gradle.kts" | head -1 | xargs dirname)
+          echo "ANDROID_DIR=$ANDROID_DIR" >> "$GITHUB_ENV"
+          echo "تم العثور على مشروع Android في: $ANDROID_DIR"
+
       - name: بناء APK
-        working-directory: project/android
-        run: gradle assembleDebug
+        working-directory: ${{ env.ANDROID_DIR }}
+        run: |
+          gradle assembleDebug
 
       - name: رفع APK
         uses: actions/upload-artifact@v4
         with:
           name: Android-APK
-          path: project/android/**/build/outputs/apk/**/*.apk
+          path: ${{ env.ANDROID_DIR }}/**/build/outputs/apk/**/*.apk
